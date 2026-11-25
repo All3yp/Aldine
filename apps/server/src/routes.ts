@@ -55,7 +55,7 @@ import { invitationMail, newInvitationId, inviteExpiry, stateOf, recipientKeys, 
 import { searchProject, replaceInProject, SearchError, type ReplaceBody } from './search.js';
 import { safeJoin, isTextFile, rawFileType, RAW_FILE_CSP, importPath, wrapperFolder, isHiddenPath, optionLikePath, cleanCommitMessage, overlongPath, pathConflict, seedError, newId, rootSiblingPath, BRANCH_RE, PROJECT_ID_RE, invalidRootFile, invalidBranchName, publicBase } from './util.js';
 import { registerOAuth } from './oauth/routes.js';
-import { verifyOutputSignature, isOutputPath } from './output-signing.js';
+import { verifyOutputSignature, isOutputPath, subkey } from './output-signing.js';
 import { projectThumb, readThumbImage, etagMatches } from './thumbnail.js';
 import { readTemplatePreview, withPreviews } from './templatepreviews.js';
 
@@ -4059,4 +4059,9 @@ button{font:inherit;font-weight:600;color:#fff;background:var(--accent);border:0
       : 'application/octet-stream';
     return reply.type(type).send(fs.readFileSync(abs));
   });
+
+  // Lab bridge (aditivo): com ALDINE_LAB_MODULE, carrega os módulos do lab e
+  // registra suas rotas/políticas. Sem a variável, nada muda em relação ao upstream.
+  const labModule = process.env.ALDINE_LAB_MODULE;
+  if (labModule) await (await import(labModule)).registerLab({ app, auth, store, db, config, subkey, authz: { isAdmin, isOwner, isMember, canAccess, canEdit, roleOf, listingAccess, ownerName } });
 }
